@@ -1,0 +1,66 @@
+{% extends 'devices/base.html' %}
+
+{% block title %}Command History - {{ device.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'device-detail-web' device.device_id %}">{{ device.name }}</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'device-commands' device.device_id %}">Commands</a></li>
+                <li class="breadcrumb-item active">History</li>
+            </ol>
+        </nav>
+        
+        <h2>Command History - {{ device.name }}</h2>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">All Commands</h5>
+            </div>
+            <div class="card-body">
+                {% if commands %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Command</th>
+                                    <th>Payload</th>
+                                    <th>Sent</th>
+                                    <th>Status</th>
+                                    <th>Executed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for command in commands %}
+                                    <tr>
+                                        <td>{{ command.get_command_type_display }}</td>
+                                        <td>{{ command.payload|default:"-" }}</td>
+                                        <td>{{ command.created_at|date:"M d, Y H:i" }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if command.executed %}success{% else %}warning{% endif %}">
+                                                {% if command.executed %}Executed{% else %}Pending{% endif %}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if command.executed_at %}
+                                                {{ command.executed_at|date:"M d, Y H:i" }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center py-4">No commands found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}  

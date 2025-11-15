@@ -1,0 +1,179 @@
+{% extends 'devices/base.html' %}
+
+{% block title %}Commands - {{ device.name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'device-management' %}">Devices</a></li>
+                <li class="breadcrumb-item"><a href="../">{{ device.device_id }}</a></li>
+                <li class="breadcrumb-item active">Commands</li>
+            </ol>
+        </nav>
+        
+        <h2>
+            <i class="fas fa-terminal"></i> Send Commands to {{ device.name }}
+            <small class="text-muted">{{ device.device_id }}</small>
+        </h2>        
+        <hr>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Send Command</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'send-command' device.device_id %}">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label for="command_type" class="form-label">Command Type</label>
+                                <select class="form-select" id="command_type" name="command_type" required>
+                                    <option value="">Select a command...</option>
+                                    <option value="enable_screen">Enable Screen</option>
+                                    <option value="disable_screen">Disable Screen</option>
+                                    <option value="reboot">Reboot</option>
+                                    <option value="factory_reset">Factory Reset</option>
+                                    <option value="change_reading_time">Change reading time</option>
+                                    <option value="update_api_url">Update API URL</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3" id="payloadField" style="display: none;">
+                                <label for="payload" class="form-label">Time (minutes)</label>
+                                <textarea class="form-control" id="payload" name="payload" 
+                                          rows="1" placeholder="Enter the frequency with which the device will read data ..." 
+                                          maxlength="10"></textarea>
+                                <div class="form-text">Default - 15 minutes. Maximum - 1440 minutes</div>
+                            </div>
+
+                            <div class="mb-3" id="updateAPIField" style="display: none;">
+                                <label for="payload" class="form-label">URL</label>
+                                <textarea class="form-control" id="payload" name="payload" 
+                                          rows="1" placeholder="127.0.0.1:8000" 
+                                          maxlength="20"></textarea>
+                                <div class="form-text">Default - 15 minutes. Maximum - 1440 minutes</div>
+                            </div>
+                            
+                            <div class="alert alert-warning" id="warningMessage" style="display: none;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Warning:</strong> This command will affect device operation.
+                            </div>
+                            <div class="alert alert-warning" id="dangerMessage" style="display: none;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Warning:</strong> This setting is for developers only. Use it only if you know what you are doing.
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Send Command
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Device Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Status:</strong> 
+                            <span class="badge bg-{% if device.is_online %}success{% else %}danger{% endif %}">
+                                {% if device.is_online %}Online{% else %}Offline{% endif %}
+                            </span>
+                        </p>
+                        <p><strong>Last Seen:</strong> 
+                            {% if device.last_seen %}
+                                {{ device.last_seen|timesince }} ago
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="card mt-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Recent Commands</h5>
+                        <a href="{% url 'command-history' device.device_id %}" class="btn btn-sm btn-outline-secondary">
+                            View All
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if commands %}
+                            <div class="list-group">
+                                {% for command in commands %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    {{ command.get_command_type_display }}
+                                                    {% if command.payload %}
+                                                        <small class="text-muted">- {{ command.payload|truncatechars:30 }}</small>
+                                                    {% endif %}
+                                                </h6>
+                                                <small class="text-muted">{{ command.created_at|date:"M d, H:i:s" }}</small>
+                                            </div>
+                                            <span class="badge bg-{% if command.executed %}success{% else %}warning{% endif %}">
+                                                {% if command.executed %}Executed{% else %}Pending{% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center py-3">No commands sent yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const commandType = document.getElementById('command_type');
+    const payloadField = document.getElementById('payloadField');
+    const warningMessage = document.getElementById('warningMessage');
+    const payloadInput = document.getElementById('payload');
+    
+    const warningCommands = ['clear_eeprom', 'factory_reset', 'restart', 'reboot'];
+    const payloadCommands = ['change_reading_time'];
+    const developerCommands = ['update_api_url'];
+    
+    commandType.addEventListener('change', function() {
+        // Show/hide payload field
+        if (payloadCommands.includes(this.value)) {
+            payloadField.style.display = 'block';
+            payloadInput.required = true;
+        } else {
+            payloadField.style.display = 'none';
+            payloadInput.required = false;
+        }
+        
+        // Show/hide warning message
+        if (warningCommands.includes(this.value)) {
+            warningMessage.style.display = 'block';
+        } else {
+            warningMessage.style.display = 'none';
+        }
+
+        if (developerCommands.includes(this.value)) {
+            updateAPIField.required = true;
+            updateAPIField.style.display = 'block';
+            dangerMessage.style.display = 'block';
+        } else {
+            updateAPIField.required = false;
+            updateAPIField.style.display = 'none';
+            dangerMessage.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

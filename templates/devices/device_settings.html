@@ -1,0 +1,123 @@
+{% extends 'devices/base.html' %}
+
+{% block title %}Register Device - EcoMonitor{% endblock %}
+
+{% block content %}
+
+<div class="row mb-1">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'device-management' %}">Devices</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'device-detail-web' device.device_id %}">{{ device.device_id }}</a></li>
+                <li class="breadcrumb-item active">Settings</li>
+            </ol>
+        </nav>
+        <h2>
+            <i class="fas fa-gear"></i> Device settings - {{ device.name }}
+            <small class="text-muted">{{ device.device_id }}</small>
+        </h2>
+        <hr>
+    </div>
+</div>
+
+
+<div class="row justify-content-center">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+                <form method="post">
+                    {% csrf_token %}
+
+                    <h3>General</h3>
+                    
+                    <div class="mb-3">
+                        <label for="device_id" class="form-label">Device name</label>
+                        <input type="text" class="form-control" id="device_id" name="device_name" 
+                               placeholder="My Device" 
+                               pattern="[A-Z0-9-]+" title="Alphanumeric characters and hyphens only">
+                        <div class="form-text">Change a custom name for your device.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="device_reading_time" class="form-label">Reading time in minutes (Needs device to be turned on)</label>
+                        <input type="text" class="form-control" id="device_reading_time" name="device_reading_time" 
+                               placeholder="Current - {{ device.reading_time }} minutes. Default - 15 minutes. Maximum - 1440 minutes" 
+                               pattern="^\d+$" title="Numbers only">
+                        <div class="form-text">Enter the frequency with which the device will read data. This will send command to your device to change it's reading time.</div>
+                    </div>
+                    
+                    <h3>Values</h3>
+                    {% if device.device_model != 'GasGuard'%}
+                    <div class="mb-3">
+                        <label for="device_min_value" class="form-label">Minimum safe value 
+                            {% if device.device_model == 'TempGuard'%} (°C)
+                            {% elif device.device_model == 'HumidGuard'%} (%RH) {% endif %}
+                        </label>
+                        <input type="text" class="form-control" id="device_min_value" name="device_min_value" 
+                               placeholder="Current: {{ device.min_value_limit }}{% if device.device_model == 'TempGuard'%}°C{% elif device.device_model == 'HumidGuard'%}% RH{% endif %}. Default: {% if device.device_model == 'TempGuard'%}18°C{% elif device.device_model == 'HumidGuard'%}30% RH{% else %}Unknown{% endif %}
+                               " 
+                               pattern="^\d+$" title="Numbers only">
+                        <div class="form-text">This is minimal value your device will count as safe. Any values lower than that will be counted as unsafe.</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="device_max_value" class="form-label">Maximum safe value 
+                            {% if device.device_model == 'GasGuard'%} (ppm)
+                            {% elif device.device_model == 'TempGuard'%} (°C)
+                            {% elif device.device_model == 'HumidGuard'%} (%RH) {% endif %}
+                        </label>
+                        <input type="text" class="form-control" id="device_max_value" name="device_max_value" 
+                        placeholder="Current: {{ device.max_value_limit }}{% if device.device_model == 'GasGuard'%} ppm{% elif device.device_model == 'TempGuard'%}°C{% elif device.device_model == 'HumidGuard'%}% RH{% endif %}. Default: {% if device.device_model == 'GasGuard'%}100 ppm{% elif device.device_model == 'TempGuard'%}26°C{% elif device.device_model == 'HumidGuard'%}60% RH{% else %}Unknown{% endif %}" 
+                        pattern="^\d+$" title="Numbers only">
+                        <div class="form-text">This is maximum value your device will count as safe. Any values higher than that will be counted as unsafe.</div>
+                    </div>
+                    
+                    <h3>Telegram (optional)</h3>
+                    <div class="mb-3">
+                        <label for="telegram_user_id" class="form-label">Telegram User ID</label>
+                        <input type="text" class="form-control" id="telegram_user_id" name="telegram_user_id" 
+                               placeholder="Enter your Telegram user ID ..."
+                               pattern="^\d+$" title="Numbers only">
+                        <div class="form-text">You can find this in @myidbot. </div>
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label for="telegram_bot_token" class="form-label">Telegram bot token</label>
+                        <input type="text" class="form-control" id="telegram_bot_token" name="telegram_bot_token" 
+                               placeholder="Enter your Telegram bot HTTP token ..."
+                               pattern="[A-Z0-9-]+" title="Alphanumeric characters and hyphens only">
+                        <div class="form-text">You can find this in @botfather.</div>
+                    </div>
+                    
+                    <div class="gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Apply settings
+                        </button>
+                        <a href="{% url 'device-detail-web' device.device_id %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        </form> <!-- закриваємо форму редагування -->
+
+                        <form method="post" action="{% url 'unregister-device' device.device_id %}" class="d-inline mt-2">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" 
+                                    onclick="return confirm('Are you sure you want to remove this device?')">
+                                <i class="fas fa-unlink"></i> Remove
+                            </button>
+                        </form>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

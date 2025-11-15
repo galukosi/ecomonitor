@@ -1,0 +1,124 @@
+{% extends 'devices/base.html' %}
+
+{% block title %}All readings - {{ device.name }}{% endblock %}
+
+{% block content %}
+<div class="row mb-1">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'device-management' %}">Devices</a></li>
+                <li class="breadcrumb-item"><a href="../">{{ device.device_id }}</a></li>
+                <li class="breadcrumb-item active">All readings</li>
+            </ol>
+        </nav>
+        <h2>
+            All readings - {{ device.name }}
+            <small class="text-muted">{{ device.device_id }}</small>
+        </h2>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <nav aria-label="...">
+                <ul class="pagination mb-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" tabindex="-1">Previous</a>
+                        </li>
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">{{page_obj.previous_page_number }}</a></li>
+                    {% endif %}
+                    
+                    <li class="page-item active">
+                        <a class="page-link" href="?page={{ page_obj.number }}">{{page_obj.number }}<span class="sr-only"></span></a>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">{{page_obj.next_page_number }}</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                </nav>
+            <div>
+                <a href="{% url 'export-json' device.device_id %}" class="btn btn-sm btn-secondary">
+                  Export as .json
+                </a>
+                <a href="{% url 'export-csv' device.device_id %}" class="btn btn-sm btn-secondary">
+                  Export as .csv
+                </a>
+                <form action="{% url 'clear-readings' device.device_id %}" class="d-inline">
+                       <button class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to clear all readings?')">Clear all</button>
+                </form>
+              </div>
+            </div>   
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped reading-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>
+                                    {% if device.device_model == 'GasGuard' %}
+                                        PPM
+                                    {% elif device.device_model == 'TempGuard' %}
+                                        Temperature °C
+                                    {% else %}
+                                        Value
+                                    {% endif %}
+                                </th>
+                                {% if device.device_model == 'GasGuard' %}
+                                <th>Raw Value</th>
+                                <th>Voltage</th>
+                                {% if device.device_model != 'Unknown' %}
+                                <th>Status</th>
+                                {% endif %}
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reading in page_obj %}
+                            <tr>
+                                <td>{{ reading.created_at|date:"M d, H:i:s" }}</td>
+                                <td>
+                                    <span class="{% if device.device_model == 'GasGuard' %} {% if reading.final_value > 100 %}text-danger{% elif reading.final_value > 50 %}text-warning{% endif %} {% endif %}">
+                                        {{ reading.final_value|floatformat:1 }}
+                                    </span>
+                                </td>
+                                {% if device.device_model == 'GasGuard' %}
+                                <td>{{ reading.raw_value }}</td>
+                                <td>{{ reading.voltage|floatformat:2 }}V</td>
+                                {% endif %}
+                                <td>
+                                    {% if device.device_model == 'GasGuard' %}
+                                        {% if device.device_model != 'Unknown' %}
+                                            {% if reading.final_value > 100 %}
+                                                <span class="badge bg-danger">Critical</span>
+                                            {% elif reading.final_value > 50 %}
+                                                <span class="badge bg-warning">High</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Normal</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No readings found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}  

@@ -1,0 +1,94 @@
+{% extends 'devices/base.html' %}
+
+{% block title %}My Devices - EcoMonitor{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2><i class="fas fa-microchip"></i> My devices</h2>
+            <a href="{% url 'register-device' %}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Register New Device
+            </a>
+        </div>
+        <hr>
+        
+        {% if devices %}
+        <div class="row">
+            {% for device in devices %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            {% if device.device_model == 'GasGuard' %}
+                                <i class="fa-solid fa-fire-flame-simple"></i>
+                            {% elif device.device_model == 'TempGuard' %}
+                                <i class="fa-solid fa-temperature-full"></i>
+                            {% elif device.device_model == 'HumidGuard' %}
+                                <i class="fa-solid fa-droplet"></i>
+                            {% else %}
+                                <i class="fa-solid fa-question"></i>
+                            {% endif %}
+                            {{ device.name }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            <strong>ID:</strong> <code>{{ device.device_id }}</code><br>
+                            <strong>Device model: {{ device.device_model|default:"N/A" }}</strong><br>
+                            <strong>Status:</strong> 
+                            <span class="badge bg-{% if device.is_online %}success{% else %}danger{% endif %}">
+                                {% if device.is_online %}Online{% else %}Offline{% endif %}
+                            </span><br>
+                            <strong>Last seen:
+                            {% if device.last_seen %}
+                                {{ device.last_seen|timesince }} ago
+                            {% else %}
+                                Never
+                            {% endif %}
+                            </strong><br>
+                            <strong>Created at: {{ device.created_at|date:"M d, Y" }}</strong><br>
+                            <strong>Minimal safe value: {{ device.min_value_limit }}{% if device.device_model == 'GasGuard'%} ppm{% elif device.device_model == 'TempGuard'%}°C{% elif device.device_model == 'HumidGuard'%}% RH{% endif %}</strong><br>
+                            <strong>Maximum safe value: {{ device.max_value_limit }}{% if device.device_model == 'GasGuard'%} ppm{% elif device.device_model == 'TempGuard'%}°C{% elif device.device_model == 'HumidGuard'%}% RH{% endif %}</strong><br>
+                            <strong>Reading time: every {{ device.reading_time }} minutes</strong><br>
+                            <strong>Linked Telegram user ID: {% if device.telegram_user_id %} {{ device.telegram_user_id}} {% else %} Not linked {% endif %}</strong><br>
+                            <strong>Bot token: {% if device.telegram_bot_token %} {{device.telegram_bot_token}} {% else %} Not linked {% endif %}</strong>
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'device-detail-web' device.device_id %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-chart-line"></i> View Data
+                            </a>
+                            <a href="{% url 'device-commands' device.device_id %}" class="btn btn-dark btn-sm">
+                                <i class="fas fa-terminal"></i> Commands
+                            </a>
+                            <a href="{% url 'device-settings' device.device_id %}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-gear"></i> Settings
+                            </a>
+                            <form method="post" action="{% url 'unregister-device' device.device_id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" 
+                                        onclick="return confirm('Are you sure you want to remove this device?')">
+                                    <i class="fas fa-unlink"></i> Remove
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-microchip fa-3x text-muted mb-3"></i>
+            <h4>No devices yet</h4>
+            <p class="text-muted">Register your first EcoMonitor device to start monitoring</p>
+            <a href="{% url 'register-device' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Register Your First Device
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
