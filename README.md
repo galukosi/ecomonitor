@@ -1,4 +1,4 @@
-
+![Знімок екрана_20-11-2025_215157_ecomonitor-znv9 onrender com](https://github.com/user-attachments/assets/356f25b8-c4af-4724-87a8-9d5992b29017)
 
 # EcoMonitor
 
