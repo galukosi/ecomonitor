@@ -33,7 +33,7 @@ It provides user authentication, device registration by serial number, real-time
 - **[TempGuard](https://github.com/trinity-corp/tempguard)**
 - **[HumidGuard](https://github.com/trinity-corp/humidguard)**
 
-## 🔹 How to run
+## How to run
 ```bash
 # Clone project
 git clone https://github.com/trinity-corp/ecomonitor.git
