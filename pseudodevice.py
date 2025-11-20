@@ -14,9 +14,7 @@ url = input("Enter endpoint API URL (default: http://0.0.0.0:8000/api/sensor-rea
 if url == "":
     url = "http://0.0.0.0:8000/api/sensor-readings/"
 
-device_id = input("Enter device id (default: GG-A5080814): ")
-if device_id == "":
-    device_id = 'GG-A5080814'
+device_id = input("Enter device id (example: GG-A5082867): ")
 
 
 while True:
