@@ -56,4 +56,5 @@ python manage.py runserver
 - Detailed readings management, such as selecting specific values readings, or readings from specific dates.
 - Translating the website to other languages.
 - Advanced device management.
+
 Made by Andriy Tymchuk, 2025.
