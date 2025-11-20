@@ -38,11 +38,11 @@
                                     <option value="disable_screen">Disable Screen</option>
                                     <option value="reboot">Reboot</option>
                                     <option value="factory_reset">Factory Reset</option>
-                                    <option value="change_reading_time">Change reading time</option>
-                                    <option value="update_api_url">Update API URL</option>
+                                    <!-- option value="change_reading_time">Change reading time</option> !-->
+                                    <!-- <option value="update_api_url">Update API URL</option> !-->
                                 </select>
                             </div>
-                            
+                            <!--
                             <div class="mb-3" id="payloadField" style="display: none;">
                                 <label for="payload" class="form-label">Time (minutes)</label>
                                 <textarea class="form-control" id="payload" name="payload" 
@@ -57,7 +57,8 @@
                                           rows="1" placeholder="127.0.0.1:8000" 
                                           maxlength="20"></textarea>
                                 <div class="form-text">Default - 15 minutes. Maximum - 1440 minutes</div>
-                            </div>
+                            </div> 
+                            !-->
                             
                             <div class="alert alert-warning" id="warningMessage" style="display: none;">
                                 <i class="fas fa-exclamation-triangle"></i>
@@ -98,7 +99,7 @@
                 </div>
                 <div class="card mt-3">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Recent Commands</h5>
+                        <h5 class="card-title mb-0">Recent commands</h5>
                         <a href="{% url 'command-history' device.device_id %}" class="btn btn-sm btn-outline-secondary">
                             View All
                         </a>
@@ -139,29 +140,26 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const commandType = document.getElementById('command_type');
-    const payloadField = document.getElementById('payloadField');
     const warningMessage = document.getElementById('warningMessage');
-    const payloadInput = document.getElementById('payload');
+    // const payloadField = document.getElementById('payloadField');
+    // const payloadInput = document.getElementById('payload');
     
     const warningCommands = ['clear_eeprom', 'factory_reset', 'restart', 'reboot'];
-    const payloadCommands = ['change_reading_time'];
-    const developerCommands = ['update_api_url'];
     
     commandType.addEventListener('change', function() {
-        // Show/hide payload field
+        
+        if (warningCommands.includes(this.value)) {
+            warningMessage.style.display = 'block';
+        } else {
+            warningMessage.style.display = 'none';
+        }
+        /*
         if (payloadCommands.includes(this.value)) {
             payloadField.style.display = 'block';
             payloadInput.required = true;
         } else {
             payloadField.style.display = 'none';
             payloadInput.required = false;
-        }
-        
-        // Show/hide warning message
-        if (warningCommands.includes(this.value)) {
-            warningMessage.style.display = 'block';
-        } else {
-            warningMessage.style.display = 'none';
         }
 
         if (developerCommands.includes(this.value)) {
@@ -173,6 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateAPIField.style.display = 'none';
             dangerMessage.style.display = 'none';
         }
+        */
     });
 });
 </script>

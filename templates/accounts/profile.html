@@ -1,22 +1,22 @@
 {% extends 'devices/base.html' %}
 
-{% block title %}My Profile - GasGuard{% endblock %}
+{% block title %}My Profile - EcoMonitor{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title mb-0">Account Information</h5>
+                <h5 class="card-title mb-0">Account information</h5>
             </div>
             <div class="card-body">
                 <p><strong>Email:</strong> {{ user.email }}</p>
                 <p><strong>Joined:</strong> {{ user.date_joined|date:"M d, Y" }}</p>
-                <p><strong>Last Login:</strong> {{ user.last_login|date:"M d, Y H:i" }}</p>
+                <p><strong>Last login:</strong> {{ user.last_login|date:"M d, Y H:i" }}</p>
                 
                 <div class="d-grid gap-2 mt-3">
                     <a href="{% url 'change_password' %}" class="btn btn-outline-primary">
-                        <i class="fas fa-key"></i> Change Password
+                        <i class="fas fa-key"></i> Change password
                     </a>
                 </div>
             </div>
@@ -26,7 +26,7 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title mb-0">My Devices</h5>
+                <h5 class="card-title mb-0">My devices</h5>
             </div>
             <div class="card-body">
                 {% if devices %}
@@ -61,7 +61,7 @@
                         <i class="fas fa-microchip fa-2x text-muted mb-2"></i>
                         <p class="text-muted">No devices registered yet</p>
                         <a href="{% url 'register-device' %}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Register Device
+                            <i class="fas fa-plus"></i> Register device
                         </a>
                     </div>
                 {% endif %}

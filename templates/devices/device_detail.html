@@ -93,6 +93,8 @@
                                     PPM
                                 {% elif device.device_model == 'TempGuard' %}
                                     °C
+                                {% elif device.device_model == 'HumidGuard' %}
+                                    % RH
                                 {% endif %}
                             </h1>
                             <p class="text-muted">
@@ -142,6 +144,8 @@
                                         PPM
                                     {% elif device.device_model == 'TempGuard' %}
                                         Temperature °C
+                                    {% elif device.device_model == 'HumidGuard' %}
+                                        Humidity % RH
                                     {% else %}
                                         Value
                                     {% endif %}

@@ -78,7 +78,7 @@ def sensor_reading(request):
 
 def send_to_telegram(message, token, chat_id):
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    data = {"chat_id": chat_id, "text": message}
+    data = {'chat_id': chat_id, 'text': message, 'parse_mode': 'Markdown'}
     requests.post(url, data=data)
 
 def check_for_alerts(device, reading):
@@ -90,8 +90,9 @@ def check_for_alerts(device, reading):
 ⚠️ WARNING! ⚠️
 ⚠️ WARNING! ⚠️
                              
-Device {device.name} detected excess CO!
-CO level: {reading.final_value} ppm.
+Device "*{device.name}*" detected excess CO!
+Current CO level: *{reading.final_value} ppm*
+CO Limit: {device.max_value_limit} ppm
 Evacuate everyone to fresh air and call emergency services from the outside!
 
 Device ID: {device.device_id}.
@@ -99,15 +100,39 @@ Device ID: {device.device_id}.
 
     if device.device_id.startswith('TG'):
         if reading.final_value > device.max_value_limit:
-            send_to_telegram(f"Warning! Too hot temperature: {reading.final_value} deegres", device.telegram_bot_token, device.telegram_user_id),
-        elif reading.final_value < device.min_value_limit:
-            send_to_telegram(f"Warning! Too cold temperature: {reading.final_value}", device.telegram_bot_token, device.telegram_user_id)
+            send_to_telegram(f"""
+🌡️ WARNING! 🌡️
 
-    if device.device_id.startswith('TG'):
-            if reading.final_value > device.max_value_limit:
-                send_to_telegram(f"Warning! Too hot temperature: {reading.final_value} deegres", device.telegram_bot_token, device.telegram_user_id),
-            elif reading.final_value < device.min_value_limit:
-                send_to_telegram(f"Warning! Too cold temperature: {reading.final_value}", device.telegram_bot_token, device.telegram_user_id)
+Device "*{device.name}*" has detected a temperature that is too high. 
+Current temperature: *{reading.final_value}°C*
+The highest safe temperature: {device.max_value_limit}°C
+""", device.telegram_bot_token, device.telegram_user_id),
+        elif reading.final_value < device.min_value_limit:
+                        send_to_telegram(f"""
+🌡️ WARNING! 🌡️
+
+Device *{device.name}* has detected a temperature that is too low. 
+Current temperature: *{reading.final_value}°C*
+The lowest safe temperature: {device.min_value_limit}°C
+""", device.telegram_bot_token, device.telegram_user_id),
+
+    elif device.device_id.startswith('HG'):
+        if reading.final_value > device.max_value_limit:
+            send_to_telegram(f"""
+☁️ WARNING! ☁️
+
+Device {device.name} has detected a humidity that is too high. 
+Current humidity: *{reading.final_value}% RH*
+The highest safe humidity: {device.max_value_limit}% RH
+""", device.telegram_bot_token, device.telegram_user_id),
+        elif reading.final_value < device.min_value_limit:
+                        send_to_telegram(f"""
+☁️ WARNING! ☁️
+
+Device {device.name} has detected a humidity that is too low. 
+Current humidity: *{reading.final_value}% RH*
+The lowest safe humidity: {device.min_value_limit}% RH
+""", device.telegram_bot_token, device.telegram_user_id),
 
 class DeviceListAPIView(generics.ListAPIView):
     queryset = Device.objects.all()

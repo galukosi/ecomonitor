@@ -1,6 +1,6 @@
 {% extends 'devices/base.html' %}
 
-{% block title %}Register Device - EcoMonitor{% endblock %}
+{% block title %}Register device - EcoMonitor{% endblock %}
 
 {% block content %}
 
@@ -46,11 +46,11 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="device_reading_time" class="form-label">Reading time in minutes (Needs device to be turned on)</label>
+                        <label for="device_reading_time" class="form-label">Reading time in minutes (Requires device restarting)</label>
                         <input type="text" class="form-control" id="device_reading_time" name="device_reading_time" 
                                placeholder="Current - {{ device.reading_time }} minutes. Default - 15 minutes. Maximum - 1440 minutes" 
                                pattern="^\d+$" title="Numbers only">
-                        <div class="form-text">Enter the frequency with which the device will read data. This will send command to your device to change it's reading time.</div>
+                        <div class="form-text">Enter the frequency with which the device send reading data and receive commands.</div>
                     </div>
                     
                     <h3>Values</h3>
@@ -105,7 +105,7 @@
                         <a href="{% url 'device-detail-web' device.device_id %}" class="btn btn-secondary">
                             <i class="fas fa-times"></i> Cancel
                         </a>
-                        </form> <!-- закриваємо форму редагування -->
+                        </form>
 
                         <form method="post" action="{% url 'unregister-device' device.device_id %}" class="d-inline mt-2">
                             {% csrf_token %}

@@ -159,7 +159,7 @@ def device_settings(request, device_id):
     if request.method == 'POST':
         # Отримуємо всі дані з форми
         name = request.POST.get('device_name')
-        reading_time = request.POST.get('device_reading_time')
+        device_reading_time = request.POST.get('device_reading_time')
         min_value = request.POST.get('device_min_value')
         max_value = request.POST.get('device_max_value')
         telegram_user_id = request.POST.get('telegram_user_id')
@@ -169,13 +169,13 @@ def device_settings(request, device_id):
         if name:
             device.name = name
 
-        if reading_time:
+        if device_reading_time:
             try:
-                device.reading_time = int(reading_time)
+                device.reading_time = int(device_reading_time)
                 DeviceCommand.objects.create(
                     device=device,
                     command_type='change_reading_time',
-                    payload=reading_time
+                    payload=device_reading_time
             )
             except ValueError:
                 messages.error(request, 'Reading time must be a number.')

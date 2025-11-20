@@ -25,7 +25,7 @@ SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = ['ecomonitor-znv9.onrender.com']
+ALLOWED_HOSTS = ['ecomonitor-znv9.onrender.com', '127.0.0.1', '192.168.0.147', '192.168.0.127', '0.0.0.0']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -129,6 +129,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20
 }
 
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 LOGGING = {
