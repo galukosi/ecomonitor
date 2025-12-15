@@ -12,14 +12,14 @@ class SensorReadingSerializer(serializers.ModelSerializer):
         read_only_fields = ('device', 'created_at')
 
     def create(self, validated_data):
-        # беремо device_id з JSON
+        # Taking device_id from JSON
         device_id = validated_data.pop('device_id')
 
-        # беремо юзера, якщо є (наприклад, якщо хтось логіниться через веб)
+        # Taking user if exists (e.g. web login)
         request = self.context.get('request')
         user = request.user if request and request.user.is_authenticated else None
 
-        # створюємо/знаходимо пристрій
+        # Create/find device
         device, _ = Device.objects.get_or_create(
             device_id=device_id,
             defaults={
@@ -28,11 +28,11 @@ class SensorReadingSerializer(serializers.ModelSerializer):
             }
         )
         
-        # оновлюємо last_seen
+        # Update last_seen
         device.last_seen = timezone.now()
         device.save()
 
-        # зберігаємо показник
+        # Save the readings
         validated_data['device'] = device
         return SensorReading.objects.create(**validated_data)
 
