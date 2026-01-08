@@ -1,0 +1,175 @@
+{% extends 'devices/base.html' %}
+{% block title %}{{ device.device_id }} - Details{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'device-management' %}">Devices</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'device-detail-web' device.device_id %}">{{ device.device_id }}</a></li>
+            </ol>
+        </nav>
+        <h2>
+            <i class="fas fa-microchip"></i> {{ device.name }}
+            <small class="text-muted">{{ device.device_id }}</small>
+        </h2>
+        <hr>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="card-title mb-0">About This Device</h5>
+                  <div>
+                    <a href="{% url 'device-commands' device.device_id %}" class="btn btn-sm btn-dark">
+                      <i class="fas fa-terminal"></i> Commands
+                    </a>
+                <a href="{% url 'device-settings' device.device_id %}" class="btn btn-sm btn-secondary">
+                      <i class="fas fa-gear"></i>
+                    </a>
+                  </div>
+                  </div>   
+                </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <strong>Status:</strong><br>
+                        <span class="badge bg-{% if device.is_online %}success{% else %}danger{% endif %}">
+                            {% if device.is_online %}Online{% else %}Offline{% endif %}
+                        </span>
+                    </div>
+                    <div class="col-6">
+                        <strong>Device model:</strong><br>
+                        {{ device.device_model|default:"Not set" }}
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-6">
+                        <strong>Last Seen:</strong><br>
+                        {% if device.last_seen %}
+                            {{ device.last_seen|timesince }} ago
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </div>
+                    <div class="col-6">
+                        <strong>Device ID:</strong><br>
+                        {{ device.device_id|default:"Unknown" }}
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-6">
+                        <strong>Created:</strong><br>
+                        {{ device.created_at|date:"M d, Y" }}
+                    </div>
+                    <div class="col-6">
+                        <strong>Total Readings:</strong><br>
+                        {{ device.readings.count }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Latest Reading</h5>
+            </div>
+            <div class="card-body">
+                {% with device.readings.first as latest %}
+                    {% if latest %}
+                        <div class="text-center">
+                            <h1 class="display-4 {% if latest.final_value > device.max_value_limit or latest.final_value < device.min_value_limit %}text-danger{% endif %}">
+                                {{ latest.final_value|floatformat:1 }}
+                                {% if device.device_model == 'GasGuard' %}
+                                    PPM
+                                {% elif device.device_model == 'TempGuard' %}
+                                    °C
+                                {% elif device.device_model == 'HumidGuard' %}
+                                    % RH
+                                {% endif %}
+                            </h1>
+                            <p class="text-muted">
+                                {{ latest.created_at|timesince }} ago
+                            </p>
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted">No readings available</p>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">Recent Readings</h5>
+              <div>
+                <a href="{% url 'readings-history' device.device_id %}" class="btn btn-sm btn-primary">
+                  View all
+                </a>
+              </div>
+            </div>   
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped reading-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>
+                                    {% if device.device_model == 'GasGuard' %}
+                                        PPM
+                                    {% elif device.device_model == 'TempGuard' %}
+                                        Temperature °C
+                                    {% elif device.device_model == 'HumidGuard' %}
+                                        Humidity % RH
+                                    {% else %}
+                                        Value
+                                    {% endif %}
+                                </th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reading in readings %}
+                            <tr>
+                                <td>{{ reading.created_at|date:"M d, H:i:s" }}</td>
+                                <td>
+                                    <span class="{% if reading.final_value > device.max_value_limit or reading.final_value < device.min_value_limit %}text-danger{% else %}text-success{% endif %}">
+                                        {{ reading.final_value|floatformat:1 }}
+                                    </span>
+                                </td>
+                                {% if device.device_model == 'GasGuard' %}
+                                {% endif %}
+                                <td>
+                                    {% if reading.final_value > device.max_value_limit or reading.final_value < device.min_value_limit %} 
+                                        <span class="badge bg-danger">Danger</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Normal</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">No readings found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
