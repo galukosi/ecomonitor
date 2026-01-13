@@ -13,17 +13,29 @@ import requests
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def sensor_reading(request):            
-    """Receive data from ESP32 and check for commands"""
+    """
+    Receive data from ESP32 and check for commands.
+    
+    Args:
+        HTTP request sent from ESP32.
+
+    Returns:
+        dict: response with status code.
+    """
     try:
+        # Get ESP request and the device_id
         data = request.data
         device_id = data.get('device_id')
-        
+
+        # device_id is required
         if not device_id:
             return Response({'error': 'device_id is required'}, status=400)
+
         
         try:
             device = Device.objects.get(device_id=device_id)
         except Device.DoesNotExist:
+            # Device must be registred in order to send readings.
             return Response({
                 'error': 'Device not registered', 
                 'message': 'Please register this device on the website first'
@@ -58,6 +70,7 @@ def sensor_reading(request):
         
         reading_data = {
             'final_value': data.get('final_value'),
+            # TODO: Remove raw_value and voltage  
             'raw_value': data.get('raw_value'),
             'voltage': data.get('voltage')
         }
@@ -75,13 +88,34 @@ def sensor_reading(request):
         return Response({'error': str(e)}, status=400)
 
 
+# TODO: Rename send_to_telegram function
 def send_to_telegram(message, token, chat_id):
+    """
+    Sends messages to Telegram bot using Telegram Bot API and requests.
+
+    Args:
+        message (str): message to be sent.
+        token (str): Telegram Bot's HTTP token.
+        chat_id (int): Telegram User chat ID.
+
+    Returns:
+        None
+    """
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     data = {'chat_id': chat_id, 'text': message, 'parse_mode': 'Markdown'}
     requests.post(url, data=data)
 
 def check_for_alerts(device, reading):
-    """Check if reading triggers any alerts"""
+    """
+    Check if reading is lower or higher than any limits, if so, send a warning message to Telegram Bot using send_to_telegram function.
+
+    Args:
+        device (Device): Device model instance.
+        reading: Device reading to be checked. 
+
+    Returns:
+        None
+    """
     if device.device_id.startswith('GG'):
         if reading.final_value > int(device.max_value_limit):
             send_to_telegram(f"""
