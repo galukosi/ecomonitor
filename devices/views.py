@@ -70,11 +70,7 @@ def sensor_reading(request):
         
         reading_data = {
             'final_value': data.get('final_value'),
-            # TODO: Remove raw_value and voltage  
-            'raw_value': data.get('raw_value'),
-            'voltage': data.get('voltage')
         }
-
         
         serializer = SensorReadingSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():

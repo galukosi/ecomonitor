@@ -71,7 +71,7 @@ def export_readings_json(request, device_id):
     data = []
     for r in readings:
         data.append({
-            'created_at': r.created_at.isoformat(),  # datetime -> ISO рядок
+            'created_at': r.created_at.isoformat(),
             'final_value': r.final_value,
         })
 

@@ -61,20 +61,3 @@ class DeviceCommandSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeviceCommand
         fields = '__all__'
-
-class DeviceDetailSerializer(serializers.ModelSerializer):
-    latest_reading = serializers.SerializerMethodField()
-    command_count = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Device
-        fields = '__all__'
-
-    def get_latest_reading(self, obj):
-        latest = obj.readings.order_by('-created_at').first()
-        if latest:
-            return SensorReadingSerializer(latest).data
-        return None
-
-    def get_command_count(self, obj):
-        return obj.commands.count()
