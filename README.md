@@ -1,4 +1,4 @@
-<img width="1917" height="435" alt="logowhite" src="https://github.com/user-attachments/assets/6fe37c6e-d42a-441d-a430-768fca917f2e" />
+<img width="1925" height="435" alt="logooutlien" src="https://github.com/user-attachments/assets/bfc07e80-ea4d-4d7d-b4ad-86a24170819a" />
 
 ##
 EcoMonitor is a web platform for monitoring EcoMonitor devices, such as GasGuard, TempGuard and HumidGuard.
