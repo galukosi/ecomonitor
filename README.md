@@ -1,9 +1,10 @@
-![Знімок екрана_20-11-2025_215157_ecomonitor-znv9 onrender com](https://github.com/user-attachments/assets/356f25b8-c4af-4724-87a8-9d5992b29017)
+<img width="1917" height="435" alt="logowhite" src="https://github.com/user-attachments/assets/6fe37c6e-d42a-441d-a430-768fca917f2e" />
 
-# EcoMonitor
-
+##
 EcoMonitor is a web platform for monitoring EcoMonitor devices, such as GasGuard, TempGuard and HumidGuard.
 It provides user authentication, device registration by serial number, real-time dashboards, device management.  
+
+![Знімок екрана_20-11-2025_215157_ecomonitor-znv9 onrender com](https://github.com/user-attachments/assets/356f25b8-c4af-4724-87a8-9d5992b29017)
 
 ## Features
 - User registration and authentication.
